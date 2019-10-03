@@ -23,25 +23,36 @@ Click the Enable button at the bottom of the page and then allow it to install t
 
 ## Deploying an application
 
-By default the automatic sidecar injection for istio is disabled. We are going to deploy to the default namespace so either from within the UI or from your computer you need to run `kubectl label namespace default istio-injection=enabled` against the child cluster.
+By default the automatic sidecar injection for istio is disabled. We are going to deploy to the default namespace so either from within the UI or from your computer you need to run 
+
+`kubectl label namespace default istio-injection=enabled` 
+
+against the child cluster.
 
 We are going to use the Istio provided BookInfo application for this example, more information on it can be found at https://istio.io/docs/examples/bookinfo/
 
-The following command needs to be executed against the cluster `kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.3/samples/bookinfo/platform/kube/bookinfo.yaml`
+The following command needs to be executed against the cluster 
+
+`kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.3/samples/bookinfo/platform/kube/bookinfo.yaml`
 
 You should see something similar to
+
 ![](images/kubectl-deploy.jpg)
 
 Going into the Default project on the child cluster should now show that there are some deployed services
+
 ![](images/rancher-deployed.jpg)
 
 Clicking on the Resource menu and choosing Istio
+
 ![](images/project-resource.jpg)
 
 At this point you will see a message that states that there is `Not enough data for graph` which is to be expected as we aren't sending any traffic through to the application yet.
 
 On the top right you will see
+
 ![](images/istio-buttons.jpg)
+
 In order these are:
 * Kiali - This shows you what services are in your mesh and how they are connected.
 * Jaeger - Is used for monitoring and troubleshooting microservices-based distributed systems.
