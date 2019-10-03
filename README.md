@@ -43,9 +43,9 @@ Going into the Default project on the child cluster should now show that there a
 
 ![](images/rancher-deployed.jpg)
 
-Clicking on the Resource menu and choosing Istio
+Now clicking on the Resource menu and choose Istio
 
-![](images/project-resource.jpg)
+![](images/resource-menu.jpg)
 
 At this point you will see a message that states that there is `Not enough data for graph` which is to be expected as we aren't sending any traffic through to the application yet.
 
@@ -66,4 +66,35 @@ If you click on the Graph tab on the left and click the show unused nodes this w
 
 ## Enabling the Istio Gateway
 
+There are 2 things left to do in order for any traffic that we send to the server to be routed through to the application container.
+
+First we need to define an ingress gateway, do this by executing the following command
+`kubectl apply -f https://raw.githubusercontent.com/chrisurwin/rancher-istio/master/istio-gateway.yaml`
+
+Secondly we need to set up the virtual service, do this by executing the following command
+`kubectl apply -f https://raw.githubusercontent.com/chrisurwin/rancher-istio/master/istio-bookinfo-vs.yaml`
+
+## Hitting the application
+
+If you browse in the UI to the `System` project of the child cluster and find the `istio-system` namespace, you should see the following
+
+![](images/istio-gateway.jpg)
+
+Assuming you left the nodeport values as the defaults when enabling Istio, clicking on the `31380/tcp` should now launch you into the bookinfo app
+
+![](images/bookinfo-entry.jpg)
+
+Clicking on normal user will then take you to the sample page.
+
+## Visualising the traffic
+
+Kiali can now be revisited and should look a little more interesting, you may need to change the time range but you should now see something similar to
+
+![](images/kiali-graph.jpg)
+
+It is now possible to click in to the various traffic flows and get more insight into the traffic flows.
+
+## Next steps
+
+If you want to see some of the more advanced scenarios that can be performed with Istio I'd recommend visiting https://istio.io/docs/examples/bookinfo/
 
