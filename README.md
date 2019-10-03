@@ -14,6 +14,7 @@ In order to enable Istio make sure that you have a cluster available with the mi
 Enabling Istio will also enable the integrated Prometheus monitoring solution with further information on it's requirements found at https://rancher.com/docs/rancher/v2.x/en/project-admin/tools/monitoring/
 
 Within the UI navigate to the child cluster and choose the `Tools > Istio` option
+
 ![](images/tools-menu.jpg)
 
 Scroll down to and expand the `Ingress Gateway` section, set `Enable Ingress Gateway` to `True` and `Service Type of Ingress Gateway` to `NodePort`.
@@ -28,7 +29,7 @@ We are going to use the Istio provided BookInfo application for this example, mo
 
 The following command needs to be executed against the cluster `kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.3/samples/bookinfo/platform/kube/bookinfo.yaml`
 
-You should see something similar to 
+You should see something similar to
 ![](images/kubectl-deploy.jpg)
 
 Going into the Default project on the child cluster should now show that there are some deployed services
@@ -40,7 +41,7 @@ Clicking on the Resource menu and choosing Istio
 At this point you will see a message that states that there is `Not enough data for graph` which is to be expected as we aren't sending any traffic through to the application yet.
 
 On the top right you will see
-![](images/istio-buttons.png)
+![](images/istio-buttons.jpg)
 In order these are:
 * Kiali - This shows you what services are in your mesh and how they are connected.
 * Jaeger - Is used for monitoring and troubleshooting microservices-based distributed systems.
