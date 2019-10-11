@@ -1,4 +1,4 @@
-### Demonstration of the Istio Guestbook sample application on Rancher
+### Demonstration of the Istio Bookinfo sample application on Rancher
 
 The following instructions will give a walkthrough of installing Istio onto a Rancher 2.3 or later cluster.
 The configuration described in the following is to demonstrate the feature and is not necessarily the config that should be used for a production environment.
