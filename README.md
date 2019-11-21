@@ -98,3 +98,57 @@ It is now possible to click in to the various traffic flows and get more insight
 
 If you want to see some of the more advanced scenarios that can be performed with Istio I'd recommend visiting https://istio.io/docs/examples/bookinfo/
 
+# Optional exercise - MTLS
+
+## Prerequisites
+
+* Istioctl
+
+```bash
+curl -L https://istio.io/downloadIstio | sh -
+cd istio-X.X.X/bin
+sudo chmod +x istioctl
+sudo mv istioctl /usr/local/bin
+```
+
+Other binaries - <https://github.com/istio/istio/releases/>
+
+* HTTP load generator
+
+```bash
+curl -s https://storage.googleapis.com/hey-release/hey_linux_amd64 --output hey
+chmod +x hey
+sudo mv hey /usr/local/bin
+```
+
+Other binaries - <https://github.com/rakyll/hey#installation>
+
+# Object Creation
+
+Broadly speaking, a `Policy` object defines that a particular service will accept (ingress). A `Destination Rule` object defines what a particular service will send (egress). Therefore, it's imperative that these match. For example, if you configure a service to accept only MTLS connections and a client sends a cleartext 
+
+In the example below we enforce MTLS at the namespace level.
+
+```yaml
+kubectl apply -f - <<EOF
+apiVersion: "authentication.istio.io/v1alpha1"
+kind: "Policy"
+metadata:
+  name: "default"
+  namespace: "default"
+spec:
+  peers:
+  - mtls: {}
+---
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "DestinationRule"
+metadata:
+  name: "default"
+  namespace: "default"
+spec:
+  host: "*.default.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+EOF
+````
