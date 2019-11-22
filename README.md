@@ -98,7 +98,9 @@ It is now possible to click in to the various traffic flows and get more insight
 
 If you want to see some of the more advanced scenarios that can be performed with Istio I'd recommend visiting https://istio.io/docs/examples/bookinfo/
 
-# Optional exercise - MTLS
+# Optional exercise - mTLS
+
+Continuing on from implementing the Bookinfo application, the following steps demonstrate how we can secure the associated microservices by leveraging mutual TLS (mTLS)
 
 ## Prerequisites
 
@@ -113,7 +115,7 @@ sudo mv istioctl /usr/local/bin
 
 Other binaries - <https://github.com/istio/istio/releases/>
 
-* HTTP load generator
+* HTTP load generator (optional)
 
 ```bash
 curl -s https://storage.googleapis.com/hey-release/hey_linux_amd64 --output hey
@@ -123,11 +125,34 @@ sudo mv hey /usr/local/bin
 
 Other binaries - <https://github.com/rakyll/hey#installation>
 
-# Object Creation
+## View current state
 
-Broadly speaking, a `Policy` object defines that a particular service will accept (ingress). A `Destination Rule` object defines what a particular service will send (egress). Therefore, it's imperative that these match. For example, if you configure a service to accept only MTLS connections and a client sends a cleartext 
+Extract the name of a pod from the bookinfo app (the following assumes no other pods reside in the default namespace outside of the BookInfo app)
 
-In the example below we enforce MTLS at the namespace level.
+```bash
+POD=$(kubectl get pods -o=jsonpath='{.items[0].metadata.name}')  
+```
+
+Then execute the following to list the current policies in place
+
+```bash
+istioctl authn tls-check $POD.default | awk 'NR == 1 || /default.svc.cluster.local/'
+
+HOST:PORT                                                                   STATUS     SERVER        CLIENT     AUTHN POLICY     DESTINATION RULE
+details.default.svc.cluster.local:9080                                      OK         HTTP/mTLS     HTTP       default/         -
+kubernetes.default.svc.cluster.local:443                                    OK         HTTP/mTLS     HTTP       default/         -
+productpage.default.svc.cluster.local:9080                                  OK         HTTP/mTLS     HTTP       default/         -
+ratings.default.svc.cluster.local:9080                                      OK         HTTP/mTLS     HTTP       default/         -
+reviews.default.svc.cluster.local:9080                                      OK         HTTP/mTLS     HTTP       default/         -
+```
+
+Notice how the services are accepting both plaintext and mTLS traffic but are currently configured to only initiate plaintext connections - this is the default behaviour. We will change this next.
+
+## Object Creation
+
+Broadly speaking, a `Policy` object defines that a particular service will accept (ingress). A `Destination Rule` object defines what a particular service will send (egress). Therefore, it's imperative that these match. For example, if you configure a service to accept only MTLS connections and a client sends a cleartext communication, it will be rejected.
+
+In the example below we enforce mTLS at the namespace level.
 
 ```yaml
 kubectl apply -f - <<EOF
@@ -151,4 +176,42 @@ spec:
     tls:
       mode: ISTIO_MUTUAL
 EOF
-````
+```
+
+## View modified state
+
+Similarly to before, execute the following to list the current configuration state:
+
+```bash
+istioctl authn tls-check $POD.default | awk 'NR == 1 || /default.svc.cluster.local/'
+HOST:PORT                                                                   STATUS     SERVER        CLIENT     AUTHN POLICY        DESTINATION RULE
+details.default.svc.cluster.local:9080                                      OK         mTLS          mTLS       default/default     default/default
+kubernetes.default.svc.cluster.local:443                                    OK         mTLS          mTLS       default/default     default/default
+productpage.default.svc.cluster.local:9080                                  OK         mTLS          mTLS       default/default     default/default
+ratings.default.svc.cluster.local:9080                                      OK         mTLS          mTLS       default/default     default/default
+reviews.default.svc.cluster.local:9080                                      OK         mTLS          mTLS       default/default     default/default
+```
+
+We are now enforcing mTLS.
+
+## Generate traffic
+
+Generate some traffic to the bookinfo app, either manually or via the aforementioned HTTP generator tool.
+
+```bash
+hey -n 500 {URL of Bookinfo}/productpage
+```
+
+## View information in Kiali
+
+As before, open Kiali. Notice in the "Overview" section the default namespace has a padlock symbol on it:
+
+![](images/kiali-mtls.png)
+
+Open the previous graph, ensure that "security" is selected from the "Display" drop down:
+
+![](images/kiali-security.png)
+
+Notice the Kiali graph UI visually acknowledges the mTLS configuration present:
+
+![](images/kiali-mtls2.png)
